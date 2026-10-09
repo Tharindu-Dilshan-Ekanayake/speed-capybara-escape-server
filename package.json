@@ -1,7 +1,7 @@
 {
-  "name": "speed-duck-escape-server",
+  "name": "speed-capybara-escape-server",
   "version": "1.0.0",
-  "description": "+1 Speed Duck Escape - Colyseus game server (Bloxity Legion)",
+  "description": "+1 Speed Capybara Escape - Colyseus game server (Bloxity Legion)",
   "private": true,
   "type": "module",
   "main": "src/index.js",

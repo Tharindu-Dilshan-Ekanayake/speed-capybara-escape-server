@@ -1,6 +1,6 @@
 # Builds the game server image, pushes it to GHCR and tells Bloxity Legion to roll it.
-#   dev branch  -> dev channel  (https://speed-duck-escape.dev.host.bloxity.io)
-#   main branch -> prod channel (https://speed-duck-escape.host.bloxity.io)
+#   dev branch  -> dev channel  (https://1-speed-capybara-escape.dev.host.bloxity.io)
+#   main branch -> prod channel (https://1-speed-capybara-escape.host.bloxity.io)
 # Required repo secret: LEGION_DEPLOY_TOKEN
 name: deploy-server
 
@@ -14,7 +14,7 @@ permissions:
   packages: write
 
 env:
-  GAME_ID: speed-duck-escape
+  GAME_ID: 1-speed-capybara-escape
 
 jobs:
   deploy:
@@ -53,6 +53,6 @@ jobs:
           CODE=$(curl -s -o resp.txt -w '%{http_code}' -X POST "https://legion.bloxity.io/v1/apps/${GAME_ID}/deploy" \
             -H "Authorization: Bearer ${LEGION_DEPLOY_TOKEN}" \
             -H 'Content-Type: application/json' \
-            -d "{\"channel\":\"${{ steps.meta.outputs.channel }}\",\"image\":\"${{ steps.meta.outputs.image }}\",\"version\":\"${{ steps.meta.outputs.sha }}\",\"seatCap\":8,\"maxReplicas\":10}")
+            -d "{\"channel\":\"${{ steps.meta.outputs.channel }}\",\"image\":\"${{ steps.meta.outputs.image }}\",\"version\":\"${{ steps.meta.outputs.sha }}\",\"seatCap\":8}")
           echo "HTTP ${CODE}"; cat resp.txt; echo
           [ "${CODE}" -lt 300 ]

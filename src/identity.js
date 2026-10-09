@@ -7,7 +7,7 @@
  */
 
 const API_URL = process.env.BLOXITY_API_URL || 'https://api.bloxity.io'
-const GAME_SLUG = process.env.BLOXITY_GAME_ID || 'speed-duck-escape'
+const GAME_SLUG = process.env.BLOXITY_GAME_ID || '1-speed-capybara-escape'
 
 /** token -> { user, at } */
 const cache = new Map()

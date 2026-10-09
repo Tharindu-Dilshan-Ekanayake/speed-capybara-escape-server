@@ -20,12 +20,9 @@ import {
   STEP_DISTANCE,
   TREADMILL_STEPS,
   TUT_DONE,
-  WORLD2_REBIRTHS,
   speedStat,
-  stageWorld,
   treadById,
   velocityFor,
-  worldFirst,
   xpForLevels,
 } from './gameData.js'
 import { lobbySpawn, minStageTime, onPad, regionAt, stageSpawn, treadAt } from './course.js'
@@ -33,19 +30,17 @@ import {
   addWins,
   addXp,
   buyBoost,
-  buyDuck,
+  buyCapy,
   buyPack,
   buyTread,
-  canEnterWorld,
   claimGift,
   clearStage,
   doRebirth,
-  equipDuck,
+  equipCapy,
   padWins,
   publicView,
   raceBonus,
   spinWheel,
-  stageAccess,
   stageLock,
   tickSpins,
   totalLevel,
@@ -82,7 +77,7 @@ export class LobbyLogic {
   /* ------------------------------------------------------------------ */
 
   addPlayer({ sid, uid, profile, avatar = null, proportions = null }, extraInit = {}) {
-    const spawn = lobbySpawn(1)
+    const spawn = lobbySpawn()
     const p = {
       sid,
       uid,
@@ -185,8 +180,7 @@ export class LobbyLogic {
       p.run = null
       return
     }
-    const first = worldFirst(reg.world)
-    const forward = prev === reg.stage - 1 || (prev === 0 && reg.stage === first)
+    const forward = prev === reg.stage - 1
     if (how === 'tp' || how === 'respawn' || forward) {
       p.run = { stage: reg.stage, at: this.now(), claimed: false }
       if (forward && how === 'walk' && reg.stage > p.profile.maxStage) {
@@ -211,7 +205,7 @@ export class LobbyLogic {
     p.budget = Math.min(p.budget + (vmax * 1.5 + 25) * dt, vmax * 3 + 60)
     const dist = Math.hypot(x - p.pos.x, z - p.pos.z)
     const reg = regionAt(x, z)
-    if (dist > p.budget + 4 || reg.world !== p.region.world || y > 200 || y < -200) {
+    if (dist > p.budget + 4 || y > 200 || y < -200) {
       this.setPos(p, p.pos, 'reject')
       return
     }
@@ -233,12 +227,6 @@ export class LobbyLogic {
 
     if (reg.stage !== p.region.stage) {
       if (reg.stage > 0) {
-        const denied = stageAccess(p.profile, reg.stage)
-        if (denied) {
-          this.toast(p, denied)
-          this.setPos(p, lobbySpawn(1))
-          return
-        }
         // Walking forward through a gate you are too low-level for: bounce back.
         const locked = reg.stage > p.region.stage ? stageLock(p.profile, reg.stage) : null
         if (locked) {
@@ -267,7 +255,7 @@ export class LobbyLogic {
       }
       // Treadmills: stand on an owned one and steps flow in.
       if (p.region.stage === 0 && p.flags & FLAG.GROUNDED) {
-        const t = treadAt(p.region.world, p.pos.x, p.pos.z)
+        const t = treadAt(p.pos.x, p.pos.z)
         if (t && p.profile.treads.includes(t.id)) p.steps += TREADMILL_STEPS * treadById(t.id).mult * dt
       }
     }
@@ -326,7 +314,7 @@ export class LobbyLogic {
       let i = 0
       const spawn = stageSpawn(1)
       for (const p of this.players.values()) {
-        if (p.region.world !== 1 || p.region.stage !== 0) continue
+        if (p.region.stage !== 0) continue
         p.racing = { start: this.now() }
         const lane = ((i % 5) - 2) * 2.4
         i += 1
@@ -361,10 +349,10 @@ export class LobbyLogic {
           return this.respawn(p, Number(m.stage) || 0)
         case 'tp':
           return this.teleport(p, m.to)
-        case 'duck':
-          return this.duck(p, String(m.id))
+        case 'capy':
+          return this.capy(p, String(m.id))
         case 'equip':
-          return this.result(p, equipDuck(p.profile, String(m.id)), true, 'equip')
+          return this.result(p, equipCapy(p.profile, String(m.id)), true, 'equip')
         case 'tread':
           return this.result(p, buyTread(p.profile, String(m.id)), false, 'buy')
         case 'rebirth':
@@ -394,12 +382,12 @@ export class LobbyLogic {
     this.changed(p, appearance)
   }
 
-  duck(p, id) {
-    const r = buyDuck(p.profile, id)
+  capy(p, id) {
+    const r = buyCapy(p.profile, id)
     if (!r.ok) return this.toast(p, r.error)
     this.send(p.sid, 'sfx', { name: r.bought ? 'buy' : 'equip' })
-    if (r.bought) this.send(p.sid, 'newDuck', { id })
-    this.broadcast('fx', { sid: p.sid, kind: 'duck' }, p.sid)
+    if (r.bought) this.send(p.sid, 'newCapy', { id })
+    this.broadcast('fx', { sid: p.sid, kind: 'capy' }, p.sid)
     this.changed(p, true)
   }
 
@@ -426,28 +414,23 @@ export class LobbyLogic {
     p.racing = null
     this.changed(p, true)
     // Cashing out ends the run: straight back to the lobby to run again (further).
-    this.setPos(p, lobbySpawn(p.region.world), 'respawn')
+    this.setPos(p, lobbySpawn(), 'respawn')
   }
 
   respawn(p, stage) {
     if (stage > 0 && stage === p.region.stage) {
       this.setPos(p, stageSpawn(stage), 'respawn', false)
     } else if (stage === 0) {
-      this.setPos(p, lobbySpawn(p.region.world), 'respawn', false)
+      this.setPos(p, lobbySpawn(), 'respawn', false)
     }
   }
 
   teleport(p, to) {
-    if (to === 'lobby') return this.setPos(p, lobbySpawn(p.region.world))
-    if (to === 'w1') return this.setPos(p, lobbySpawn(1))
-    if (to === 'w2') {
-      const denied = canEnterWorld(p.profile, 2)
-      if (denied) return this.toast(p, denied)
-      this.send(p.sid, 'sfx', { name: 'portal' })
-      return this.setPos(p, lobbySpawn(2))
-    }
     // No stage teleports: every run starts from the lobby.
-    return undefined
+    if (to === 'lobby') {
+      p.racing = null
+      this.setPos(p, lobbySpawn())
+    }
   }
 
   rebirth(p) {
@@ -463,7 +446,7 @@ export class LobbyLogic {
     if (!r.ok) return this.toast(p, r.error)
     this.send(p.sid, 'spin', { idx: r.idx, reward: r.reward })
     if (r.reward.lv) this.levelUp(p, r.reward.lv)
-    this.changed(p, !!r.reward.duck)
+    this.changed(p, !!r.reward.capy)
   }
 
   gift(p, i) {
@@ -499,12 +482,8 @@ export class LobbyLogic {
         const n = Math.max(0, Math.min(STAGE_COUNT, Math.floor(Number(m.stage) || 0)))
         if (n === 0) {
           p.racing = null
-          this.setPos(p, lobbySpawn(p.region.world))
+          this.setPos(p, lobbySpawn())
           break
-        }
-        if (stageWorld(n) === 2 && pr.rebirths < WORLD2_REBIRTHS) {
-          this.toast(p, `World 2 needs ${WORLD2_REBIRTHS} Rebirths! (use +Rebirth)`)
-          return
         }
         if (n > pr.maxStage) pr.maxStage = n
         p.region = regionAt(stageSpawn(n).x, stageSpawn(n).z)

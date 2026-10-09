@@ -1,7 +1,7 @@
-# +1 Speed Duck Escape — game server
+# +1 Speed Capybara Escape — game server
 
-Colyseus 0.16 server for Bloxity Legion. One `lobby` room = up to 8 players; the 9th gets a
-new lobby. Leaderboards are global (shared Mongo).
+Colyseus 0.16 server for Bloxity Legion (game id `1-speed-capybara-escape`). One `lobby`
+room = up to 8 players; the 9th gets a new lobby. Leaderboards are global (shared Mongo).
 
 ```bash
 npm install
@@ -14,7 +14,7 @@ npm run check      # end-to-end smoke test against the running server
 | `src/index.js` | HTTP + WebSocket server, `/health`, CORS, graceful shutdown |
 | `src/LobbyRoom.js` | Colyseus adapter: identity, persistence, session takeover |
 | `src/shared/lobbyLogic.js` | The game simulation (shared with the client's offline mode) |
-| `src/shared/rules.js` | Economy: ducks, treadmills, rebirths, wheel, gifts, boosts |
+| `src/shared/rules.js` | Economy: capybaras, treadmills, rebirths, wheel, gifts, boosts |
 | `src/shared/course.js` | Lobby + 20 stage layouts (pads, spawns, regions) |
 | `src/db.js` | Mongo (`MONGODB_URI`) or local JSON fallback |
 | `src/identity.js` | Verifies Bloxity login tokens; guests use a device id |
@@ -23,9 +23,12 @@ npm run check      # end-to-end smoke test against the running server
 
 ## Deploy (GitHub Actions → Legion)
 
-1. Add repo secret **`LEGION_DEPLOY_TOKEN`** (Settings → Secrets and variables → Actions).
-2. Push to `dev` (dev channel) or `main` (prod).
-3. After the first push: repo → Packages → `speed-duck-escape-server` → Package settings →
-   Change visibility → **Public**, then re-run the workflow.
+1. Add repo secret **`LEGION_DEPLOY_TOKEN`** (Settings → Secrets and variables → Actions →
+   Secrets tab).
+2. Push to `dev` (dev channel, `https://1-speed-capybara-escape.dev.host.bloxity.io`) or
+   `main` (prod, `https://1-speed-capybara-escape.host.bloxity.io`).
+3. After the first push: GitHub profile → Packages → `1-speed-capybara-escape-server` →
+   Package settings → Change visibility → **Public**, then re-run the workflow.
 
-`seatCap` 8 (= `maxClients`), `maxReplicas` 10.
+Legion injects `PORT`, `MONGODB_URI`, `CLIENT_ORIGIN`, `BLOXITY_GAME_ID` etc. `seatCap` is 8
+(= the room's `maxClients`); the matchmaker starts more pods as lobbies fill.

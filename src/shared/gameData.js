@@ -1,25 +1,25 @@
 /**
- * +1 Speed Duck Escape - shared game data.
+ * +1 Speed Capybara Escape - shared game data.
  *
  * CANONICAL COPY. The server keeps a byte-identical copy in
- * speed-duck-escape-server/src/shared/ (run `npm run sync-shared` there after editing).
+ * speed-capybara-escape-server/src/shared/ (run `npm run sync-shared` there after editing).
  * Pure data + pure functions only: no DOM, no three.js, no Node APIs.
  */
 
-export const GAME_ID = 'speed-duck-escape'
-export const GAME_NAME = '+1 Speed Duck Escape'
+export const GAME_ID = '1-speed-capybara-escape'
+export const GAME_NAME = '+1 Speed Capybara Escape'
 export const ROOM_NAME = 'lobby'
 export const MAX_PLAYERS_PER_LOBBY = 8
 
-/** Set false before launch to hide the developer panel (stage jumper / free wins). */
+/** Temporary stage-jump controls; set false before launch to hide developer tools. */
 export const DEV_TOOLS = false
 
 /* ------------------------------------------------------------------ */
 /* Levels & speed                                                      */
 /* ------------------------------------------------------------------ */
 
-/** Step XP needed to go from `level` to `level + 1`. L5 -> 217, L8 -> 326 (matches the original). */
-export const xpForLevel = (level) => Math.floor(110 * Math.pow(1.145, level))
+/** Step XP needed to go from `level` to `level + 1`. */
+export const xpForLevel = (level) => Math.floor(110 * Math.pow(1.19, level))
 
 /** The "Speed: 24" number on the HUD. Level 1 = 16 (Roblox default walk speed). */
 export const speedStat = (level) => 14 + 2 * level
@@ -34,7 +34,7 @@ export function velocityFor(stat) {
   return Math.min(30, 24 + 4 * Math.log(stat / 140))
 }
 
-/** Distance (m) walked on the ground that counts as one "waddle" (+N step XP). */
+/** Distance (m) walked on the ground that counts as one step (+N step XP). */
 export const STEP_DISTANCE = 1.5
 /** Treadmill steps per second at 1X. */
 export const TREADMILL_STEPS = 4
@@ -49,53 +49,45 @@ export const winMultiplier = (rebirths) => 1 + 0.5 * rebirths
 export const friendBoost = (others) => Math.min(0.7, Math.max(0, others) * 0.1)
 
 /* ------------------------------------------------------------------ */
-/* Ducks                                                               */
+/* Capybaras                                                           */
 /* ------------------------------------------------------------------ */
 
 /**
- * Every duck is bought with Wins (no premium currency anywhere). Owned ducks are kept
- * forever (rebirth does not take them). `fx` drives the look: see Duck.jsx.
+ * The capybara you ride. Every one is bought with Wins (no premium currency anywhere) and
+ * kept forever (rebirth does not take them). `fur` / `belly` / `nose` colour the model,
+ * `fx` adds accessories and particles: see Capybara.jsx.
  */
-export const DUCKS = [
-  // ---- World 1 --------------------------------------------------------------
-  { id: 'rubber', name: 'Rubber Duck', world: 1, perStep: 1, cost: 0, reb: 0, body: '#ffd21a', beak: '#ff8a1a', fx: {} },
-  { id: 'shadow', name: 'Shadow Duck', world: 1, perStep: 2, cost: 3, reb: 0, body: '#1d2140', beak: '#ffb21a', fx: { rim: '#5b6bff' } },
-  { id: 'ruby', name: 'Ruby Duck', world: 1, perStep: 5, cost: 15, reb: 0, body: '#c8102e', beak: '#ff8a1a', fx: { rim: '#ff5577' } },
-  { id: 'gent', name: 'Gentleman Duck', world: 1, perStep: 25, cost: 100, reb: 0, body: '#ffd21a', beak: '#ff8a1a', fx: { hat: 'top' } },
-  { id: 'ghost', name: 'Ghost Duck', world: 1, perStep: 50, cost: 500, reb: 0, body: '#f4fbff', beak: '#cfe8ff', fx: { glow: '#bfe6ff', ghost: true, particles: 'sparkle', pc: '#ffffff' } },
-  { id: 'inferno', name: 'Inferno Duck', world: 1, perStep: 100, cost: 2500, reb: 0, body: '#ff3d0a', beak: '#ffd21a', fx: { glow: '#ff5a00', particles: 'fire', pc: '#ffae00' } },
-  { id: 'love', name: 'Love Duck', world: 1, perStep: 250, cost: 5000, reb: 0, body: '#ff6fcf', beak: '#ff9ad5', fx: { glow: '#ff6fd8', particles: 'hearts', pc: '#ff3fa8', wings: '#ffd6f2' } },
-  { id: 'frost', name: 'Frost Duck', world: 1, perStep: 450, cost: 8000, reb: 0, body: '#4fe6ff', beak: '#d8fbff', fx: { glow: '#5ef0ff', particles: 'snow', pc: '#e8fdff' } },
-  { id: 'storm', name: 'Storm Duck', world: 1, perStep: 1000, cost: 16000, reb: 0, body: '#20243f', beak: '#e6e6ff', fx: { glow: '#dfe6ff', ring: '#ffffff', particles: 'wind', pc: '#ffffff' } },
-  { id: 'volt', name: 'Volt Duck', world: 1, perStep: 2500, cost: 32000, reb: 0, body: '#28e0a8', beak: '#fff06a', fx: { glow: '#3dffc0', particles: 'bolts', pc: '#bfffee', wings: '#a8ffe6' } },
-  { id: 'lucky', name: 'Lucky Duck', world: 1, perStep: 4000, cost: -1, reb: 0, body: '#ffd21a', beak: '#ff8a1a', fx: { rainbow: true, glow: '#ff3a3a', particles: 'stars', pc: '#ffffff' }, wheel: true },
-  // ---- World 2 --------------------------------------------------------------
-  { id: 'galaxy', name: 'Galaxy Duck', world: 2, perStep: 6000, cost: 60000, reb: 3, body: '#3b1d8f', beak: '#ff9af2', fx: { glow: '#9a6bff', particles: 'stars', pc: '#e6d8ff', galaxy: true } },
-  { id: 'crystal', name: 'Crystal Duck', world: 2, perStep: 12000, cost: 120000, reb: 3, body: '#9ff3ff', beak: '#e0fbff', fx: { glow: '#7ff7ff', crystal: true, particles: 'sparkle', pc: '#d9fbff' } },
-  { id: 'lavalord', name: 'Lava Lord', world: 2, perStep: 25000, cost: 250000, reb: 4, body: '#1a0f0f', beak: '#ff6a00', fx: { glow: '#ff3c00', horns: '#ff6a00', particles: 'fire', pc: '#ff5a00', cracks: '#ff5a00' } },
-  { id: 'angel', name: 'Angel Duck', world: 2, perStep: 50000, cost: 500000, reb: 5, body: '#fffdf2', beak: '#ffcf4a', fx: { glow: '#fff1a8', halo: '#ffd84a', wings: '#ffffff', particles: 'sparkle', pc: '#fff3b0' } },
-  { id: 'neon', name: 'Neon Duck', world: 2, perStep: 100000, cost: 1000000, reb: 6, body: '#ff1fa6', beak: '#29f3ff', fx: { glow: '#ff2fd0', ring: '#29f3ff', particles: 'sparkle', pc: '#29f3ff' } },
-  { id: 'toxic', name: 'Toxic Duck', world: 2, perStep: 250000, cost: 2000000, reb: 7, body: '#7dff1a', beak: '#1f3d00', fx: { glow: '#a6ff00', particles: 'bubbles', pc: '#c8ff5a' } },
-  { id: 'royal', name: 'Royal Duck', world: 2, perStep: 500000, cost: 4000000, reb: 8, body: '#ffcc1a', beak: '#ff8a1a', fx: { glow: '#ffd84a', hat: 'crown', gold: true, particles: 'sparkle', pc: '#fff0a0' } },
-  { id: 'void', name: 'Void Duck', world: 2, perStep: 1000000, cost: 8000000, reb: 10, body: '#0b0614', beak: '#b46bff', fx: { glow: '#8a2bff', ring: '#b46bff', particles: 'stars', pc: '#c79bff' } },
-  { id: 'phoenix', name: 'Rainbow Phoenix', world: 2, perStep: 2500000, cost: 16000000, reb: 12, body: '#ff5a1a', beak: '#ffe14a', fx: { rainbow: true, glow: '#ffb000', wings: '#ffd04a', particles: 'fire', pc: '#ffe14a' } },
-  { id: 'golden', name: 'Golden God Duck', world: 2, perStep: 5000000, cost: 30000000, reb: 15, body: '#ffc81a', beak: '#fff1a0', fx: { glow: '#ffe066', gold: true, halo: '#fff6c0', ring: '#ffe066', particles: 'sparkle', pc: '#fff6b0' } },
+export const CAPYS = [
+  { id: 'classic', name: 'Classic Capy', perStep: 1, cost: 0, reb: 0, fur: '#b9773f', belly: '#d9a066', nose: '#4a2a18', fx: {} },
+  { id: 'choco', name: 'Choco Capy', perStep: 2, cost: 5, reb: 0, fur: '#6b3f24', belly: '#8f5a36', nose: '#2a160c', fx: {} },
+  { id: 'lime', name: 'Lime Capy', perStep: 4, cost: 40, reb: 0, fur: '#5fd13a', belly: '#9ef06a', nose: '#1f5a12', fx: { glow: '#7dff3a' } },
+  { id: 'gent', name: 'Gentleman Capy', perStep: 8, cost: 250, reb: 0, fur: '#a8683a', belly: '#c98d58', nose: '#3a2010', fx: { hat: 'top', monocle: true } },
+  { id: 'yuzu', name: 'Yuzu Capy', perStep: 15, cost: 1500, reb: 0, fur: '#c88a4a', belly: '#e8b47a', nose: '#4a2a18', fx: { yuzu: true, particles: 'bubbles', pc: '#ffd24a' } },
+  { id: 'ghost', name: 'Ghost Capy', perStep: 30, cost: 8000, reb: 0, fur: '#eef7ff', belly: '#ffffff', nose: '#9fb8d8', fx: { glow: '#bfe6ff', ghost: true, particles: 'sparkle', pc: '#ffffff' } },
+  { id: 'lava', name: 'Lava Capy', perStep: 60, cost: 40000, reb: 0, fur: '#e8401a', belly: '#ff8a3a', nose: '#3a0a04', fx: { glow: '#ff5a00', cracks: '#ffb000', particles: 'fire', pc: '#ffae00' } },
+  { id: 'frost', name: 'Frost Capy', perStep: 110, cost: 120000, reb: 0, fur: '#7fe6ff', belly: '#dffaff', nose: '#2a6a8a', fx: { glow: '#5ef0ff', particles: 'snow', pc: '#e8fdff', shades: true } },
+  { id: 'love', name: 'Love Capy', perStep: 200, cost: 300000, reb: 0, fur: '#ff8fd0', belly: '#ffd0ec', nose: '#8a1a5a', fx: { glow: '#ff6fd8', particles: 'hearts', pc: '#ff3fa8', flowers: true } },
+  { id: 'storm', name: 'Storm Capy', perStep: 350, cost: 700000, reb: 0, fur: '#2a3050', belly: '#4a5478', nose: '#0e1020', fx: { glow: '#8fb4ff', particles: 'bolts', pc: '#cfe2ff', shades: true } },
+  { id: 'lucky', name: 'Lucky Capy', perStep: 600, cost: -1, reb: 0, fur: '#3fd17a', belly: '#b8ffcf', nose: '#0f4a24', fx: { glow: '#5dff9a', particles: 'stars', pc: '#ffe14a', clover: true }, wheel: true },
+  { id: 'galaxy', name: 'Galaxy Capy', perStep: 1000, cost: 1800000, reb: 1, fur: '#3b1d8f', belly: '#7a4dff', nose: '#12063a', fx: { glow: '#9a6bff', particles: 'stars', pc: '#e6d8ff', galaxy: true } },
+  { id: 'angel', name: 'Angel Capy', perStep: 2000, cost: 4000000, reb: 2, fur: '#fffdf2', belly: '#ffffff', nose: '#c9a46a', fx: { glow: '#fff1a8', halo: '#ffd84a', wings: '#ffffff', particles: 'sparkle', pc: '#fff3b0' } },
+  { id: 'dragon', name: 'Dragon Capy', perStep: 4000, cost: 8000000, reb: 3, fur: '#c8102e', belly: '#ff6a3a', nose: '#3a0006', fx: { glow: '#ff3c00', horns: '#ffcf4a', wings: '#7a0a14', particles: 'fire', pc: '#ff7a1a' } },
+  { id: 'golden', name: 'Golden King Capy', perStep: 8000, cost: 15000000, reb: 5, fur: '#ffc81a', belly: '#fff0a0', nose: '#8a5a00', fx: { glow: '#ffe066', gold: true, hat: 'crown', particles: 'sparkle', pc: '#fff6b0' } },
 ]
-export const duckById = (id) => DUCKS.find((d) => d.id === id) || DUCKS[0]
+export const capyById = (id) => CAPYS.find((d) => d.id === id) || CAPYS[0]
 
 /* ------------------------------------------------------------------ */
 /* Treadmills                                                          */
 /* ------------------------------------------------------------------ */
 
+/** `fx`: how the treadmill shows off (see Lobby.jsx) - plain, leaf, gold, ice, fire, bolt. */
 export const TREADMILLS = [
-  { id: 't1', world: 1, mult: 1, cost: 0, reb: 0, color: '#3a3d4f', glow: null },
-  { id: 't2', world: 1, mult: 2, cost: 25, reb: 0, color: '#ff5a1a', glow: '#ffae00' },
-  { id: 't3', world: 1, mult: 4, cost: 400, reb: 0, color: '#1fb8ff', glow: '#5ef0ff' },
-  { id: 't4', world: 1, mult: 25, cost: 25000, reb: 2, color: '#b21fff', glow: '#ff3df0' },
-  { id: 't5', world: 2, mult: 50, cost: 150000, reb: 3, color: '#29f3ff', glow: '#29f3ff' },
-  { id: 't6', world: 2, mult: 100, cost: 600000, reb: 5, color: '#ff2fd0', glow: '#ff7af0' },
-  { id: 't7', world: 2, mult: 250, cost: 3000000, reb: 8, color: '#ffcc1a', glow: '#fff06a' },
-  { id: 't8', world: 2, mult: 1000, cost: 20000000, reb: 12, color: '#8a2bff', glow: '#c79bff' },
+  { id: 't1', mult: 1, cost: 0, reb: 0, color: '#8a93a8', glow: '#ffffff', fx: 'plain' },
+  { id: 't2', mult: 2, cost: 60, reb: 0, color: '#2fbf4a', glow: '#7dff6a', fx: 'leaf' },
+  { id: 't3', mult: 4, cost: 1500, reb: 0, color: '#ffb81a', glow: '#fff06a', fx: 'gold' },
+  { id: 't4', mult: 8, cost: 60000, reb: 1, color: '#e8f4ff', glow: '#9fe8ff', fx: 'ice' },
+  { id: 't5', mult: 16, cost: 1000000, reb: 2, color: '#e8202a', glow: '#ff7a1a', fx: 'fire' },
+  { id: 't6', mult: 32, cost: 6000000, reb: 4, color: '#1f8bff', glow: '#5ef0ff', fx: 'bolt' },
 ]
 export const treadById = (id) => TREADMILLS.find((t) => t.id === id) || null
 
@@ -103,67 +95,45 @@ export const treadById = (id) => TREADMILLS.find((t) => t.id === id) || null
 /* Stages                                                              */
 /* ------------------------------------------------------------------ */
 
-/** World 1 = stages 1-15, World 2 = stages 16-25. */
-export const W1_STAGES = 15
-export const STAGE_COUNT = 25
-export const WORLD2_REBIRTHS = 3
-export const worldFirst = (world) => (world === 2 ? W1_STAGES + 1 : 1)
-export const worldLast = (world) => (world === 2 ? STAGE_COUNT : W1_STAGES)
-export const stageWorld = (stage) => (stage > W1_STAGES ? 2 : 1)
+/** One jungle world, twenty stages. */
+export const STAGE_COUNT = 20
 
 /**
  * Wins for a stage's end pad (before multipliers). Index 0 unused. Claiming a pad ends the
  * run and sends you back to the lobby, so each value is the reward for the whole run up to
  * that stage: cash out early for a little, or push on (harder, needs more Speed) for a lot.
  */
-export const STAGE_WINS = [
-  0,
-  // World 1
-  1, 3, 6, 12, 22, 40, 70, 120, 200, 320, 500, 800, 1250, 2000, 3200,
-  // World 2 (x2.5 already from 3 rebirths)
-  5000, 7500, 11000, 16000, 23000, 33000, 47000, 66000, 92000, 130000,
-]
+export const STAGE_WINS = [0, 1, 3, 6, 12, 22, 40, 70, 120, 200, 320, 500, 800, 1250, 2000, 3200, 5000, 7500, 11000, 16000, 25000]
 
 /**
  * Level needed to pass each stage's gate (a force field blocks you below it). Rebirth
  * resets your level, so every rebirth means climbing back up - with bigger multipliers.
  */
-export const STAGE_LEVEL = [
-  0,
-  // World 1
-  1, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27,
-  // World 2
-  5, 10, 15, 20, 25, 30, 35, 40, 45, 50,
-]
+export const STAGE_LEVEL = [0, 1, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37]
 export const stageLevel = (stage) => STAGE_LEVEL[stage] || 1
 
 export const STAGE_NAMES = [
   '',
-  'River Bridges',
-  'Bobbing Stones',
-  'Tsunami Terraces',
+  'Capy Bridges',
+  'Red Leaf Hop',
+  'River Jumps',
+  'Giant Ball Alley',
+  'Sky Ramp',
+  'Yuzu Bounce',
+  'Log Spin Lagoon',
+  'Hot Spring Hop',
+  'Wobbly Bridges',
+  'Coconut Canyon',
+  'Watermelon Swing',
   'Lava Floodway',
   'Lava Leap',
-  'Spinner Islands',
-  'Mushroom Bounce',
-  'Sky Bridge',
-  'Boulder Canyon',
-  'Flooded Bridges',
-  'Log Rollers',
-  'Axe Causeway',
-  'Crumbling Cliffs',
+  'Cloud Hop',
+  'Tsunami Terraces',
+  'Coconut Rain',
+  'Fruit Factory',
+  'Laser Temple',
   'Spinning Lava Wheels',
-  'Great Duck Escape',
-  'Crystal Caves',
-  'Conveyor Chaos',
-  'Pendulum Hall',
-  'Laser Grid',
-  'Piston Peaks',
-  'Meteor Shower',
-  'Wind Tunnel',
-  'Turntables',
-  'Lava Rising',
-  'Golden Temple',
+  'Great Capybara Escape',
 ]
 
 /** The best single pad you have unlocked - prices for boosts / packs / gifts scale with it. */
@@ -199,7 +169,7 @@ export const WHEEL = [
   { id: 'w_big', label: 'BIG Wins', kind: 'wins', f: 2, w: 10, color: '#ff4fd8' },
   { id: 'x2speed', label: '2x Speed', kind: 'boost', boost: 'speed', min: 5, w: 12, color: '#3dffc0' },
   { id: 'levels', label: '+3 Levels', kind: 'levels', n: 3, w: 11, color: '#b46bff' },
-  { id: 'lucky', label: '???', kind: 'duck', duck: 'lucky', w: 1, color: '#ff3a3a' },
+  { id: 'lucky', label: '???', kind: 'capy', capy: 'lucky', w: 1, color: '#ff3a3a' },
 ]
 
 export const BOOST_MINUTES = 10

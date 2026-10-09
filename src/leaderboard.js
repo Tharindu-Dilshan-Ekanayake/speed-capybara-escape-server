@@ -10,7 +10,7 @@ const REFRESH_MS = 20_000
 let cache = { wins: [], level: [], rebirths: [], at: 0 }
 const listeners = new Set()
 
-const row = (p, v) => ({ name: p.name || 'Player', v: v || 0, r: p.rebirths || 0, duck: p.duck || 'rubber' })
+const row = (p, v) => ({ name: p.name || 'Player', v: v || 0, r: p.rebirths || 0, capy: p.capy || 'classic' })
 
 async function refresh() {
   try {
