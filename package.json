@@ -1,0 +1,25 @@
+{
+  "name": "speed-duck-escape-server",
+  "version": "1.0.0",
+  "description": "+1 Speed Duck Escape - Colyseus game server (Bloxity Legion)",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "sync-shared": "node scripts/sync-shared.mjs",
+    "check": "node scripts/smoke-test.mjs"
+  },
+  "dependencies": {
+    "@colyseus/ws-transport": "0.16.5",
+    "colyseus": "0.16.5",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongodb": "^6.12.0"
+  },
+  "devDependencies": {
+    "colyseus.js": "0.16.22"
+  }
+}
