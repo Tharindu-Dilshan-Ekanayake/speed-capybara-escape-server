@@ -11,7 +11,7 @@ import { LobbyRoom } from './LobbyRoom.js'
 import { GAME_ID, ROOM_NAME } from './shared/gameData.js'
 
 /**
- * +1 Speed Duck Escape - game server.
+ * +1 Speed Capybara Escape - game server.
  *
  * Legion contract: listen on $PORT, answer GET /health fast, run as non-root (see
  * Dockerfile), and drain on SIGTERM (Colyseus' graceful shutdown + the room's

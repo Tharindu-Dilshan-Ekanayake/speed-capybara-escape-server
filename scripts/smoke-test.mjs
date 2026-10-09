@@ -32,9 +32,9 @@ check(rooms[0].got('join').length >= 7, 'first player saw the others join')
 
 // Walk player 0 from spawn to the Stage 1 pad (the server rejects faster-than-possible clears).
 const a = rooms[0]
-const s = lobbySpawn(1)
+const s = lobbySpawn()
 const pad = STAGES[1].pad
-const steps = 280 // ~5 m/s: a legal pace for a level-1 duck
+const steps = 340 // ~5 m/s: a legal pace for a level-1 capybara
 for (let k = 1; k <= steps; k += 1) {
   const t = k / steps
   const x = s.x + (pad.x - s.x) * t

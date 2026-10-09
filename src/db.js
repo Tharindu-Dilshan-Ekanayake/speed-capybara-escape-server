@@ -12,7 +12,7 @@ import { MongoClient } from 'mongodb'
  */
 
 const LEADERBOARD_FIELDS = ['totalWins', 'totalLevel', 'rebirths']
-const PROJECTION = { name: 1, totalWins: 1, totalLevel: 1, level: 1, rebirths: 1, duck: 1 }
+const PROJECTION = { name: 1, totalWins: 1, totalLevel: 1, level: 1, rebirths: 1, capy: 1 }
 
 class MongoStore {
   constructor(uri) {

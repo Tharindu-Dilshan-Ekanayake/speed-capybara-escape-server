@@ -8,7 +8,7 @@
 import {
   BOOST_MAX_MINUTES,
   BOOST_MINUTES,
-  DUCKS,
+  CAPYS,
   GIFTS,
   PACKS,
   SPIN_EVERY_MS,
@@ -17,16 +17,14 @@ import {
   TREADMILLS,
   TUT_DONE,
   WHEEL,
-  WORLD2_REBIRTHS,
   boostPrice,
-  duckById,
+  capyById,
   friendBoost,
   giftWins,
   packPrice,
   rebirthLevel,
   runWins,
   stageLevel,
-  stageWorld,
   stepMultiplier,
   winMultiplier,
   xpForLevel,
@@ -44,8 +42,8 @@ export function newProfile(name = 'Player') {
     totalWins: 0,
     rebirths: 0,
     totalLevel: 1,
-    duck: 'rubber',
-    ducks: ['rubber'],
+    capy: 'classic',
+    capys: ['classic'],
     treads: ['t1'],
     maxStage: 1,
     stagesCleared: 0,
@@ -56,8 +54,8 @@ export function newProfile(name = 'Player') {
     boostSpeed: 0,
     /** Tutorial step for new players (TUT_DONE when finished). */
     tut: 0,
-    /** Save layout version (2 = World 1 has 15 stages). */
-    sv: 2,
+    /** Save layout version. */
+    sv: 1,
     createdAt: now,
     updatedAt: now,
   }
@@ -68,16 +66,15 @@ export function migrate(stored, name) {
   const base = newProfile(name)
   const p = { ...base, ...(stored || {}) }
   if (stored) {
-    // Saves from before World 1 grew from 10 to 15 stages: World 2 moved up by 5.
-    if (!stored.sv && Number(stored.maxStage) > 10) p.maxStage = Number(stored.maxStage) + 5
-    p.sv = 2
+    p.sv = 1
     // Only brand-new players get the guide; anyone who has already played skips it.
     if (stored.tut === undefined) p.tut = (stored.totalWins || 0) > 0 || (stored.level || 1) > 1 || (stored.rebirths || 0) > 0 ? TUT_DONE : 0
   }
-  for (const k of ['ducks', 'treads']) if (!Array.isArray(p[k])) p[k] = base[k]
-  if (!p.ducks.includes('rubber')) p.ducks.unshift('rubber')
+  for (const k of ['capys', 'treads']) if (!Array.isArray(p[k])) p[k] = base[k]
+  p.capys = p.capys.filter((id) => CAPYS.some((c) => c.id === id))
+  if (!p.capys.includes('classic')) p.capys.unshift('classic')
   if (!p.treads.includes('t1')) p.treads.unshift('t1')
-  if (!p.ducks.includes(p.duck)) p.duck = 'rubber'
+  if (!p.capys.includes(p.capy)) p.capy = 'classic'
   for (const k of ['level', 'xp', 'wins', 'rebirths', 'maxStage', 'spins', 'spinMs']) {
     if (!Number.isFinite(p[k])) p[k] = base[k]
   }
@@ -122,8 +119,8 @@ export function addWins(p, amount) {
 
 /** Step XP for one waddle, all multipliers applied. */
 export function xpPerStep(p, others = 0, now = Date.now()) {
-  const duck = duckById(p.duck)
-  let v = duck.perStep * stepMultiplier(p.rebirths) * (1 + friendBoost(others))
+  const capy = capyById(p.capy)
+  let v = capy.perStep * stepMultiplier(p.rebirths) * (1 + friendBoost(others))
   if (p.boostSpeed > now) v *= 2
   return v
 }
@@ -135,15 +132,6 @@ export function padWins(p, stage, { race = false, now = Date.now() } = {}) {
   if (race) v *= 2
   return Math.max(1, Math.round(v))
 }
-
-export function canEnterWorld(p, world) {
-  if (world === 2 && p.rebirths < WORLD2_REBIRTHS) {
-    return `World 2 needs ${WORLD2_REBIRTHS} Rebirths!`
-  }
-  return null
-}
-
-export const stageAccess = (p, stage) => canEnterWorld(p, stageWorld(stage))
 
 /** The stage gate's force field: you need a high enough level to pass. */
 export function stageLock(p, stage) {
@@ -160,25 +148,25 @@ export function clearStage(p, stage) {
 
 /* ------------------------------------------------------------------ */
 
-export function buyDuck(p, id) {
-  const d = DUCKS.find((x) => x.id === id)
-  if (!d) return fail('Unknown duck')
-  if (p.ducks.includes(id)) {
-    p.duck = id
+export function buyCapy(p, id) {
+  const d = CAPYS.find((x) => x.id === id)
+  if (!d) return fail('Unknown capybara')
+  if (p.capys.includes(id)) {
+    p.capy = id
     return ok({ equipped: true })
   }
-  if (d.cost < 0) return fail('Win this duck on the Lucky Wheel!')
+  if (d.cost < 0) return fail('Win this capybara on the Lucky Wheel!')
   if (p.rebirths < d.reb) return fail(`Needs ${d.reb} Rebirths!`)
   if (p.wins < d.cost) return fail('Not enough Wins!')
   p.wins -= d.cost
-  p.ducks.push(id)
-  p.duck = id
+  p.capys.push(id)
+  p.capy = id
   return ok({ bought: true })
 }
 
-export function equipDuck(p, id) {
-  if (!p.ducks.includes(id)) return fail('You do not own this duck yet!')
-  p.duck = id
+export function equipCapy(p, id) {
+  if (!p.capys.includes(id)) return fail('You do not own this capybara yet!')
+  p.capy = id
   return ok()
 }
 
@@ -272,11 +260,11 @@ function applyReward(p, r, now) {
       const lv = addXp(p, xp)
       return { text: `+${r.n} Levels`, lv }
     }
-    case 'duck': {
-      if (!p.ducks.includes(r.duck)) {
-        p.ducks.push(r.duck)
-        p.duck = r.duck
-        return { text: 'LUCKY DUCK!', duck: r.duck }
+    case 'capy': {
+      if (!p.capys.includes(r.capy)) {
+        p.capys.push(r.capy)
+        p.capy = r.capy
+        return { text: 'LUCKY CAPY!', capy: r.capy }
       }
       const wins = giftWins(5, p.maxStage, p.rebirths)
       addWins(p, wins)
@@ -334,6 +322,6 @@ export function publicView(p) {
     level: p.level,
     rebirths: p.rebirths,
     wins: p.wins,
-    duck: p.duck,
+    capy: p.capy,
   }
 }
